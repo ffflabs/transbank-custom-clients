@@ -1,0 +1,10 @@
+/vendor
+.idea
+.built
+.bundled
+composer.lock
+.phpunit.result.cache
+.phive
+tools
+.build/**/*.php
+.build
