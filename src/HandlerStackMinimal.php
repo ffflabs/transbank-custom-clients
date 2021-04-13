@@ -18,7 +18,7 @@ use Psr\Http\Message\ResponseInterface;
  *
  * @final
  */
-class HandlerStack
+class HandlerStackMinimal
 {
     /**
      * @var null|callable(RequestInterface, array): PromiseInterface
