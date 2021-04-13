@@ -62,10 +62,11 @@ class MiddlewareAwareClient extends HttpClient implements HttpClientInterface
 
         return $this->tap(fn () => $this->client = new Client([
             'decode_content' => true,
-            'handler' => $handlerStack, 'http_errors' => false,
+            'handler' => $handlerStack,
+            'http_errors' => false,
             'headers' => [
                 'Content-Type' => 'application/json',
-                'User-Agent' => 'SDK-PHP/' . $installedVersion,
+                'User-Agent' => 'SDK-PHP/' . $installedVersion . '.' . \basename(\str_replace('\\', '/', \get_class($this))),
             ],
         ]));
     }
