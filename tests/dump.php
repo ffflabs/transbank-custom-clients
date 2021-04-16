@@ -23,25 +23,6 @@ if (!\function_exists('tap')) {
     }
 }
 
-if (!\function_exists('addRequestHeader')) {
-    function addRequestHeader($header, $value)
-    {
-        return function (callable $handler) use ($header, $value) {
-            return function (
-                RequestInterface $request,
-                array $options
-            ) use (
-                $handler,
-                $header,
-                $value
-            ) {
-                $request = $request->withHeader($header, $value);
-
-                return $handler($request, $options);
-            };
-        };
-    }
-}
 
 if (!\function_exists('addResponseHeader')) {
     function addResponseHeader($header, $value)

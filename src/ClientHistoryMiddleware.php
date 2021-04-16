@@ -38,8 +38,8 @@ class ClientHistoryMiddleware extends ClientMiddleware
                         ];
 
                         return $value;
-                    }
-                )->otherWise(
+                    },
+
                     function ($reason) use ($request, $options) {
                         $this->history[] = [
                             'request' => $request,
@@ -48,7 +48,7 @@ class ClientHistoryMiddleware extends ClientMiddleware
                             'options' => $options,
                         ];
 
-                        return $reason instanceof PromiseInterface ? $reason : new RejectedPromise($reason);
+                        return   new RejectedPromise($reason);
                     }
                 );
         };

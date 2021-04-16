@@ -69,6 +69,6 @@ it('uses_the_base_url_provided_by_the_given_options', function () {
         ])->withHandlerStack(function (HandlerStack $handlerStack) use ($log) {
             $handlerStack->push(new ClientLogMiddleware($log), 'logger');
         })->request('POST', $endpoint, [], $optionsMock);
-
+expect
     expect($testHandler->getRecords())->toBeArray()->toHaveCount(2);
 });

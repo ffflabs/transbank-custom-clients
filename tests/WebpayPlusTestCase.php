@@ -6,7 +6,10 @@
 
 namespace Tests;
 
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Transbank\Webpay\Options;
 
 /**
@@ -57,5 +60,11 @@ class WebpayPlusTestCase extends TestCase
         $this->buyOrder = '123999555';
         $this->returnUrl = 'https://comercio.cl/callbacks/transaccion_finalizada';
         $this->mockBaseUrl = 'http://mockurl.cl';
+    }
+    protected function getLogger(string $name = null): LoggerInterface
+    {
+        $log = new Logger($name ?? 'Transbank');
+        $testHandler = new TestHandler();
+        return    $log->pushHandler($testHandler); // <<< uses a stream
     }
 }

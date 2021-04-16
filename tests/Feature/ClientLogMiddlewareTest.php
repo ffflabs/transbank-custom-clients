@@ -23,14 +23,7 @@ use Transbank\Webpay\WebpayPlus\Transaction;
  */
 it('can inject a psr logger into a middleware aware client', function () {
     // create a log channel
-    $log = new Logger('WebpayPlus');
-    $streamHandler = new StreamHandler('php://stderr', Logger::DEBUG);
-    $testHandler = new TestHandler();
-    $lineFormatter = new LineFormatter(null, null, true, true);
-    $lineFormatter->setJsonPrettyPrint(true);
-    $streamHandler->setFormatter($lineFormatter);
-    $log->pushHandler($testHandler); // <<< uses a stream
-    $log->pushHandler($streamHandler); // <<< uses a stream
+    $log = $this->getLogger('WebpayPlus');
 
     $httpClient = (new MiddlewareAwareClient())
         ->withMockResponses([
@@ -44,5 +37,5 @@ it('can inject a psr logger into a middleware aware client', function () {
     $transaction = (new Transaction(null, $httpClientRequestService));
     $this->assertSame($transaction->getRequestService(), $httpClientRequestService);
     $transaction->create(\sprintf('%s1', $this->buyOrder), $this->sessionId, $this->amount, $this->returnUrl);
-    expect($testHandler->getRecords())->toBeArray()->toHaveCount(2);
+    expect($log->getHandlers()[0]->getRecords())->toBeArray()->toHaveCount(2);
 });

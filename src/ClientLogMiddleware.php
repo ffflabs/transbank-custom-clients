@@ -7,6 +7,7 @@
 namespace CTOhm\TransbankCustomClients;
 
 use Closure;
+use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
@@ -28,16 +29,20 @@ class ClientLogMiddleware extends ClientMiddleware
     {
         return function (RequestInterface $request, array $options = []) use ($handler) {
             $this->logger->info(
-                \sprintf('%s %s' . \PHP_EOL, $request->getMethod(), $request->getRequestTarget()),
+                \sprintf('%s %s (%s)' . \PHP_EOL, $request->getMethod(), $request->getRequestTarget(), $request->getUri()),
                 self::normalizeRequestPayload($request)
             );
 
-            return $handler($request, $options)->then(
+            $res = $handler($request, $options);
+            return ($res instanceof PromiseInterface) ? $res->then(
                 fn (ResponseInterface $response) => tap($response, fn ($response) => $this->logger->info(
                     \sprintf('Response from %s %s ' . \PHP_EOL, $request->getRequestTarget(), $response->getReasonPhrase()),
                     self::normalizeResponsePayload($response)
                 ))
-            );
+            ) : tap($res, fn ($response) => $this->logger->info(
+                \sprintf('Response from %s %s ' . \PHP_EOL, $request->getRequestTarget(), $response->getReasonPhrase()),
+                self::normalizeResponsePayload($response)
+            ));
         };
     }
 }
