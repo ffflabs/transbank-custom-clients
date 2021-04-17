@@ -6,6 +6,9 @@
 
 namespace Tests;
 
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\StreamHandler;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
@@ -61,10 +64,18 @@ class WebpayPlusTestCase extends TestCase
         $this->returnUrl = 'https://comercio.cl/callbacks/transaccion_finalizada';
         $this->mockBaseUrl = 'http://mockurl.cl';
     }
-    protected function getLogger(string $name = null): LoggerInterface
+
+    protected function getLogger(?string $name = null): LoggerInterface
     {
-        $log = new Logger($name ?? 'Transbank');
-        $testHandler = new TestHandler();
-        return    $log->pushHandler($testHandler); // <<< uses a stream
+        return new Logger($name ?? 'Transbank', [new TestHandler()]);
+    }
+
+    protected function getLogConsoleHandler(): HandlerInterface
+    {
+        return (new StreamHandler('php://stderr', Logger::DEBUG))
+            ->setFormatter(
+                //new LineFormatter(null, null, true, true
+                (new \Monolog\Formatter\ScalarFormatter())->setJsonPrettyPrint(true)
+            );
     }
 }

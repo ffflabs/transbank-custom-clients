@@ -15,6 +15,7 @@ use Transbank\Utils\HttpClientRequestService;
 
 class MiddlewareAwareClientService extends HttpClientRequestService implements RequestService
 {
+    use Tappable;
     /**
      * @var MiddlewareAwareClient
      */

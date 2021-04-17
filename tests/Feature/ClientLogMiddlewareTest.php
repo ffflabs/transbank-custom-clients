@@ -10,10 +10,6 @@ use CTOhm\TransbankCustomClients\ClientLogMiddleware;
 use CTOhm\TransbankCustomClients\MiddlewareAwareClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\TestHandler;
-use Monolog\Logger;
 use Transbank\Utils\HttpClientRequestService;
 use Transbank\Webpay\WebpayPlus\Transaction;
 

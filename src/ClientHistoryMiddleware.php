@@ -8,12 +8,12 @@ namespace CTOhm\TransbankCustomClients;
 
 use ArrayIterator;
 use Closure;
-use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Promise\RejectedPromise;
 use Psr\Http\Message\RequestInterface;
 
-class ClientHistoryMiddleware extends ClientMiddleware
+class ClientHistoryMiddleware extends ClientMiddleware implements ClientMiddlewareInterface
 {
+    use Tappable;
     private array $history;
 
     public function __construct()
@@ -39,7 +39,6 @@ class ClientHistoryMiddleware extends ClientMiddleware
 
                         return $value;
                     },
-
                     function ($reason) use ($request, $options) {
                         $this->history[] = [
                             'request' => $request,
@@ -48,7 +47,7 @@ class ClientHistoryMiddleware extends ClientMiddleware
                             'options' => $options,
                         ];
 
-                        return   new RejectedPromise($reason);
+                        return new RejectedPromise($reason);
                     }
                 );
         };

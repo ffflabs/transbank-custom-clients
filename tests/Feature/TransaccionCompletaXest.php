@@ -26,7 +26,7 @@ use Transbank\Webpay\Options;
  * @internal
  * @coversNothing
  */
-class TransaccionCompletaTest extends TestCase
+class TransaccionCompletaXest extends TestCase
 {
     /**
      * @var int

@@ -5,6 +5,7 @@
  */
 
 use CTOhm\TransbankCustomClients\ClientLogMiddleware;
+use CTOhm\TransbankCustomClients\MiddlewareAwareClient;
 use CTOhm\TransbankCustomClients\MiddlewareAwareClientService;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
@@ -12,8 +13,6 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
-use Transbank\Utils\HttpClient;
-use Transbank\Utils\HttpClientRequestService;
 use Transbank\Webpay\Options;
 
 /** @ test */
@@ -26,7 +25,7 @@ it('send_the_headers_provided_by_the_given_options', function () {
         ->method('getHeaders')
         ->willReturn($expectedHeaders);
 
-    $httpClientMock = $this->createMock(HttpClient::class);
+    $httpClientMock = $this->createMock(MiddlewareAwareClient::class);
     $httpClientMock
         ->expects($this->once())
         ->method('request')
@@ -35,12 +34,12 @@ it('send_the_headers_provided_by_the_given_options', function () {
         ]))
         ->willReturn(
             new Response(200, [], \json_encode([
-                'token' => 'mock',
+                'token' => __METHOD__,
                 'url' => 'http://mock.cl/',
             ]))
         );
 
-    $request = (new HttpClientRequestService($httpClientMock))->request('POST', '/transactions', [], $optionsMock);
+    $request = (new MiddlewareAwareClientService($httpClientMock))->request('POST', '/transactions', [], $optionsMock);
 });
 
 /** @test */
@@ -69,6 +68,6 @@ it('uses_the_base_url_provided_by_the_given_options', function () {
         ])->withHandlerStack(function (HandlerStack $handlerStack) use ($log) {
             $handlerStack->push(new ClientLogMiddleware($log), 'logger');
         })->request('POST', $endpoint, [], $optionsMock);
-expect
+
     expect($testHandler->getRecords())->toBeArray()->toHaveCount(2);
 });

@@ -13,12 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 
 class ClientMiddleware
 {
-    public function tap(Closure $callback)
-    {
-        $callback($this);
-
-        return $this;
-    }
+    use Tappable;
 
     public static function normalizeMessage(MessageInterface $message)
     {

@@ -5,24 +5,26 @@
  */
 
 use Kint\Kint;
+use Monolog\Utils;
 use Psr\Http\Message\RequestInterface;
 
-$projectRootPath = $_ENV['APP_BASE_PATH'] ?? (\dirname(__DIR__));
-$basePath = $projectRootPath;
-\defined('APP_BASE_PATH') || \define('APP_BASE_PATH', $projectRootPath);
-
-\define('IN_CONSOLE', \getenv('APP_RUNNING_IN_CONSOLE') || (\in_array(\PHP_SAPI, ['cli', 'phpdbg'], true)));
-\define('KINT_FILE_PATH', IN_CONSOLE ? 'php://stderr' : \sprintf('%s/storage/%s', APP_BASE_PATH, 'logs/kint.debug.txt'));
-
 if (!\function_exists('tap')) {
-    function tap($subject, Closure $callback)
+    /**
+     * Call the given Closure with the given value then return the value.
+     *
+     * @param mixed $value
+     *
+     * @return mixed
+     */
+    function tap($value, ?callable $callback = null)
     {
-        $callback($subject);
+        if (null !== $callback) {
+            $callback($value);
+        }
 
-        return $subject;
+        return $value;
     }
 }
-
 
 if (!\function_exists('addResponseHeader')) {
     function addResponseHeader($header, $value)
@@ -44,6 +46,107 @@ if (!\function_exists('addResponseHeader')) {
     }
 }
 
+if (!\function_exists('normalize')) {
+    /**
+     * Normalizes given $data.
+     *
+     * @param mixed $data
+     * @param mixed $depth
+     *
+     * @return mixed
+     */
+    function normalize($data, $depth = 0)
+    {
+        if (10 < $depth) {
+            return 'Over 9 levels deep, aborting normalization';
+        }
+
+        if (\is_array($data) || $data instanceof \Traversable) {
+            $normalized = [];
+
+            $count = 1;
+            $total = null;
+
+            if (\is_countable($data)) {
+                $total = \count($data);
+            }
+
+            foreach ($data as $key => $value) {
+                if (25 < $count++) {
+                    $normalized['...'] = \sprintf('Over %d items (%s total), aborting normalization', 25, $total ?? 'undetermined');
+
+                    break;
+                }
+
+                $normalized[$key] = normalize($value, $depth + 1);
+            }
+
+            return $normalized;
+        }
+
+        if ($data instanceof Exception || $data instanceof Throwable) {
+            return normalizeException($data, $depth);
+        }
+        //kdump($data);
+        return $data;
+    }
+}
+
+if (!\function_exists('normalizeException')) {
+    /**
+     * Normalizes given exception with or without its own stack trace based on
+     * `includeStacktraces` property.
+     *
+     * @param Exception|Throwable $e
+     */
+    function normalizeException(Throwable $e, int $depth = 1, bool $includeStacktraces = true): array
+    {
+        $class = Utils::getClass($e);
+        $base_path = \dirname(__DIR__);
+        $data = [
+            'class' => $class,
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => \str_replace($base_path, '', $e->getFile()) . ':' . $e->getLine(),
+        ];
+
+        $maxTraceLength = 30;
+
+        if ($includeStacktraces) {
+            $trace = $e->getTrace();
+
+            foreach ($trace as $index => $frame) {
+                if ($index > $maxTraceLength) {
+                    break;
+                }
+
+                if (isset($frame['file'])) {
+                    $data['trace'][] = \str_replace($base_path, '', $frame['file']) . ':' . $frame['line'];
+                } elseif (isset($frame['function']) && '{closure}' === $frame['function']) {
+                    // We should again normalize the frames, because it might contain invalid items
+                    $data['trace'][] = $frame['function'];
+                } elseif (\is_string($frame)) {
+                    $data['trace'][] = \str_replace($base_path, '', $frame);
+                } else {
+                    // We should again normalize the frames, because it might contain invalid items
+                    $frame = normalize($frame, $depth);
+                    $data['trace'][] = $frame;
+                }
+            }
+        }
+
+        if (10 <= $depth) {
+            return $data;
+        }
+        $previous = $e->getPrevious();
+
+        if ($previous && $previous instanceof Throwable) {
+            $data['previous'] = normalizeException($previous, $depth + 1, true);
+        }
+
+        return \array_merge(['thrown_at' => \microtime(true)], $data);
+    }
+}
 /**
  * ESta función sólo loguea a la consola o a un archivo.
  */
