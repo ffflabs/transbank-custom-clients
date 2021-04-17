@@ -6,19 +6,18 @@
 
 use CTOhm\TransbankCustomClients\ClientLogMiddleware;
 use CTOhm\TransbankCustomClients\MiddlewareAwareClient;
-use CTOhm\TransbankCustomClients\MiddlewareAwareClientService;
+use CTOhm\TransbankCustomClients\MiddlewareRequestService;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\TestHandler;
-use Monolog\Logger;
 use Transbank\Webpay\Options;
 
 /** @ test */
-it('send_the_headers_provided_by_the_given_options', function () {
+it('can fire a request using a mocked client and a custom requestService', function () {
     $expectedHeaders = ['api_key' => 'commerce_code', 'api_secret' => 'fakeApiKey'];
-
+    $expectedResponsePayload = [
+        'token' => __METHOD__,
+        'url' => 'http://mock.cl/',
+    ];
     $optionsMock = $this->createMock(Options::class);
     $optionsMock
         ->expects($this->once())
@@ -26,6 +25,7 @@ it('send_the_headers_provided_by_the_given_options', function () {
         ->willReturn($expectedHeaders);
 
     $httpClientMock = $this->createMock(MiddlewareAwareClient::class);
+
     $httpClientMock
         ->expects($this->once())
         ->method('request')
@@ -33,17 +33,15 @@ it('send_the_headers_provided_by_the_given_options', function () {
             'headers' => $expectedHeaders,
         ]))
         ->willReturn(
-            new Response(200, [], \json_encode([
-                'token' => __METHOD__,
-                'url' => 'http://mock.cl/',
-            ]))
+            new Response(200, [], \json_encode($expectedResponsePayload))
         );
 
-    $request = (new MiddlewareAwareClientService($httpClientMock))->request('POST', '/transactions', [], $optionsMock);
+    $responsePayload = (new MiddlewareRequestService($httpClientMock))->request('POST', '/transactions', [], $optionsMock);
+    expect($responsePayload)->toEqualCanonicalizing($expectedResponsePayload);
 });
 
 /** @test */
-it('uses_the_base_url_provided_by_the_given_options', function () {
+it('inject a logging middleware into a middleware aware client service', function () {
     $expectedBaseUrl = 'http://mock.cl/';
     $endpoint = '/transactions';
 
@@ -53,21 +51,16 @@ it('uses_the_base_url_provided_by_the_given_options', function () {
         ->method('getApiBaseUrl')
         ->willReturn($expectedBaseUrl);
 
-    $log = new Logger('WebpayPlus');
-    $streamHandler = new StreamHandler('php://stderr', Logger::DEBUG);
-    $testHandler = new TestHandler();
-    $lineFormatter = new LineFormatter(null, null, true, true);
-    $lineFormatter->setJsonPrettyPrint(true);
-    $streamHandler->setFormatter($lineFormatter);
-    $log->pushHandler($testHandler); // <<< uses a stream
+    $log = $this->getLogger('WebpayPlus');
+    $streamHandler = $this->getLogConsoleHandler();
     $log->pushHandler($streamHandler); // <<< uses a stream
 
-    $request = (new MiddlewareAwareClientService(null))
+    $request = (new MiddlewareRequestService(null))
         ->withMockResponses([
             new Response(200, ['Content-Type' => 'application/json'], \json_encode(['token' => \uniqid(), 'url' => 'http://request0.cl/'])),
         ])->withHandlerStack(function (HandlerStack $handlerStack) use ($log) {
             $handlerStack->push(new ClientLogMiddleware($log), 'logger');
         })->request('POST', $endpoint, [], $optionsMock);
 
-    expect($testHandler->getRecords())->toBeArray()->toHaveCount(2);
+    expect($log)->toHaveTestRecords(2);
 });

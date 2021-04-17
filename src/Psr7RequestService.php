@@ -20,6 +20,7 @@ use Transbank\Webpay\Options;
 class Psr7RequestService implements RequestService
 {
     use Tappable;
+
     /**
      * @var ClientInterface
      */

@@ -11,6 +11,9 @@ use Http\Mock\Client;
 use Transbank\Webpay\WebpayPlus\Transaction;
 
 it('can send a transaction request with guzzle adapter client', function () {
+    global $argv, $argc;
+    dump(\getenv('APP_USER_ID'));
+    dd($argv);
     $httpClient = new Client();
     $httpClient->setDefaultResponse(new Response(201, ['Content-Type' => 'application/json'], \json_encode([
         'token' => \sprintf('%s.%s', $this->getName(), \uniqid()),

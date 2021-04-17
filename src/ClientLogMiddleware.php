@@ -16,6 +16,7 @@ use Psr\Log\NullLogger;
 class ClientLogMiddleware extends ClientMiddleware implements ClientMiddlewareInterface
 {
     use Tappable;
+
     private LoggerInterface $logger;
 
     public function __construct(?LoggerInterface $logger = null)

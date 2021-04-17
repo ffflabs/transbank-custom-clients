@@ -46,7 +46,7 @@ it(
         }
         $response = $handler($request, []);
 
-        expect($log->getHandlers()[0]->getRecords())->not()->toBeEmpty();
+        expect($log)->toHaveTestRecords();
         $loggedRequest = $log->getHandlers()[0]->getRecords()[0];
 
         expect($loggedRequest)->toBeArray()->toHaveKey('context');

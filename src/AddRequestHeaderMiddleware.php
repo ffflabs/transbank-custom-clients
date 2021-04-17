@@ -12,6 +12,7 @@ use Psr\Http\Message\RequestInterface;
 class AddRequestHeaderMiddleware extends ClientMiddleware implements ClientMiddlewareInterface
 {
     use Tappable;
+
     private string $headerName;
 
     private string $headerValue;

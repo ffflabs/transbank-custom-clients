@@ -10,7 +10,7 @@ use Closure;
 
 trait Tappable
 {
-    public function tap(Closure $callback): self
+    public function tap(Closure $callback)
     {
         return tap($this, $callback);
     }

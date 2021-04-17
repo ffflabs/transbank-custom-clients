@@ -14,6 +14,7 @@ use Psr\Http\Message\RequestInterface;
 class ClientHistoryMiddleware extends ClientMiddleware implements ClientMiddlewareInterface
 {
     use Tappable;
+
     private array $history;
 
     public function __construct()

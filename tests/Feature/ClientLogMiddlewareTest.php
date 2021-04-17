@@ -33,5 +33,5 @@ it('can inject a psr logger into a middleware aware client', function () {
     $transaction = (new Transaction(null, $httpClientRequestService));
     $this->assertSame($transaction->getRequestService(), $httpClientRequestService);
     $transaction->create(\sprintf('%s1', $this->buyOrder), $this->sessionId, $this->amount, $this->returnUrl);
-    expect($log->getHandlers()[0]->getRecords())->toBeArray()->toHaveCount(2);
+    expect($log)->toHaveTestRecords(2);
 });

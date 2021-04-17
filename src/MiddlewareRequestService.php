@@ -13,9 +13,10 @@ use Psr\Http\Client\ClientInterface;
 use Transbank\Contracts\RequestService;
 use Transbank\Utils\HttpClientRequestService;
 
-class MiddlewareAwareClientService extends HttpClientRequestService implements RequestService
+class MiddlewareRequestService extends HttpClientRequestService implements RequestService
 {
     use Tappable;
+
     /**
      * @var MiddlewareAwareClient
      */

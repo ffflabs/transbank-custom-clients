@@ -4,6 +4,10 @@
  * CTOhm - Transbank Custom Clients
  */
 
+use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\TestHandler;
+use Psr\Log\LoggerInterface;
+
 uses(Tests\WebpayPlusTestCase::class)->in('Feature');
 
 /*
@@ -19,6 +23,20 @@ uses(Tests\WebpayPlusTestCase::class)->in('Feature');
 
 expect()->extend('toBeOne', function () {
     return $this->toBe(1);
+});
+expect()->extend('toHaveTestRecords', function (?int $expectedRecords = null): void {
+    expect($this->value)->toBeInstanceOf(LoggerInterface::class);
+    expect($this->value->getHandlers())->toBeArray();
+    $testHandler = \array_filter($this->value->getHandlers(), fn (HandlerInterface $handler) => $handler instanceof TestHandler);
+
+    if (\count($testHandler) > 0) {
+        $logRecords = \array_values($testHandler)[0]->getRecords();
+        expect($logRecords)->toBeArray();
+
+        if (null !== $expectedRecords) {
+            expect($logRecords)->toHaveCount(2);
+        }
+    }
 });
 
 /*

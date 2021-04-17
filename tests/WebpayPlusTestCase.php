@@ -75,7 +75,7 @@ class WebpayPlusTestCase extends TestCase
         return (new StreamHandler('php://stderr', Logger::DEBUG))
             ->setFormatter(
                 //new LineFormatter(null, null, true, true
-                (new \Monolog\Formatter\ScalarFormatter())->setJsonPrettyPrint(true)
+                (new \Monolog\Formatter\LineFormatter(null, null, true, true))->setJsonPrettyPrint(true)
             );
     }
 }

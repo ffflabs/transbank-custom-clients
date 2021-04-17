@@ -47,7 +47,7 @@ it('can send a request with middleware for curl client', function ($client) {
 
     $homeResponse = $prev($request, []); //  $addHeader($loggerMiddleware(        $handler    ))($request, []);
 
-    expect($log->getHandlers()[0]->getRecords())->not()->toBeEmpty();
+    expect($log)->toHaveTestRecords();
     $loggedRequest = $log->getHandlers()[0]->getRecords()[0];
 
     expect($loggedRequest)->toBeArray()->toHaveKey('context');
